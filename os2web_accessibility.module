@@ -20,8 +20,9 @@ function os2web_accessibility_menu() {
   $items['handicap'] = array(
     'title' => 'Handicap side',
     'page callback' => 'os2web_accessibility_frontpage',
+    'page arguments' => array(1),
     'access callback' => TRUE,
-    'type' => MENU_SUGGESTED_ITEM,
+    //'type' => MENU_SUGGESTED_ITEM,
   );
   return $items;
 }
@@ -54,10 +55,99 @@ function os2web_accessibility_setting_form() {
   return system_settings_form($form);
 }
 
-function os2web_accessibility_frontpage() {
-  $nid = variable_get('os2web_accessibility_node_content');
+function os2web_accessibility_frontpage($nid = '') {
+  $nid_setting = variable_get('os2web_accessibility_node_content',18);
   global $base_url;
-  if (isset($nid)) {
-    drupal_goto($base_url."/print/".$nid);
+
+  // Goto handicap node page.
+  if ($nid != "") {
+    $print_node_id = $nid;
+  }
+  // Goto handicap frontpage - node + menus.
+  else {
+    $print_node_id = $nid_setting;
+  }
+  // Handle the query
+  $query = $_GET;
+  unset($query['q']);
+
+  module_load_include('inc', 'print', 'print.pages');
+
+  $print = print_controller($print_node_id, $query, $cid, PRINT_HTML_FORMAT);
+
+  if ($print !== FALSE) {
+    $node = $print['node'];
+    $output = os2web_accessibility_site_map_menus();
+
+    $html = theme('print', array('print' => $print, 'type' => PRINT_HTML_FORMAT, 'node' => $node));
+    drupal_add_http_header('Content-Type', 'text/html; charset=utf-8');
+    drupal_send_headers();
+    // delete print window open and close.
+    $html = str_replace("window.print();","",$html);
+    $html = str_replace("window.close();","",$html);
+    $html = str_replace('<div class="print-foot" style = "width:100%">',"$output <div class='print-foot' style = 'width:100%'>",$html);
+    print $html;
+  }
+
+}
+
+/**
+ * Render the latest maps for all the menus.
+ *
+ * @return string
+ *   Returns HTML string of site map for menus.
+ */
+function os2web_accessibility_site_map_menus() {
+  $output = '';
+  $options = array();
+  $mids = array_filter(variable_get('os2web_accessibility_show_menus', array()));
+
+  if (!empty($mids)) {
+    foreach ($mids as $mid) {
+      $class = array();
+      $menu = menu_load($mid);
+      // Use menu_tree_all_data to retrieve the expanded tree.
+      $tree = menu_tree_all_data($mid);
+
+      if (module_exists('i18n_menu')) {
+        $tree = i18n_menu_localize_tree($tree, $GLOBALS['language']->language);
+      }
+
+      // Add an alter hook so other modules can manipulate the menu tree prior to rendering
+      $alter_mid = preg_replace('/[^a-z0-9_]+/', '_', $mid);
+      drupal_alter(array('site_map_menu_tree', 'site_map_menu_tree_' . $alter_mid), $tree, $menu);
+      $tree = os2web_accessibility_menu_link_alter($tree);
+      $menu_display = menu_tree_output($tree);
+
+      $menu_html .= drupal_render($menu_display);
+      //print_r($menu_html);
+      if (!empty($menu_html)) {}
+    }
+  }
+
+  return $menu_html;
+}
+function os2web_accessibility_menu_link_alter($tree){
+  foreach ($tree as $i =>$link) {
+    //print_r($link);
+    foreach ($link as $key => $value) {
+      $pos = substr($value['href'],0,4);
+      if($pos === 'node') {
+        $link_value = str_replace('node/','handicap/',$value['href']);
+      }
+      else {
+        $link_value = "handicap/".$value['href'];
+      }
+      $tree[$i][$key]['href'] = $link_value;
+    }
+  }
+  return $tree;
+}
+
+function os2web_accessibility_js_alter(&$javascript) {
+  $path = current_path();
+  $path = explode("/",$path);
+  if ($path[0] == 'handicap') {
+    //unset($javascript['path/to/script.js']);
   }
 }
