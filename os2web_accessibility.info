@@ -1,4 +1,4 @@
-name = os2web_accessibility
+name = OS2web - Accessibility
 description = Handicap module, display site in a print version
 core = 7.x
 version = 7.x-1.0

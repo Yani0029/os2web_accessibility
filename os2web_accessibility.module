@@ -116,7 +116,7 @@ function os2web_accessibility_site_map_menus() {
       // Add an alter hook so other modules can manipulate the menu tree prior to rendering
       $alter_mid = preg_replace('/[^a-z0-9_]+/', '_', $mid);
       drupal_alter(array('site_map_menu_tree', 'site_map_menu_tree_' . $alter_mid), $tree, $menu);
-      $tree = os2web_accessibility_menu_link_alter($tree);
+      $tree = os2web_accessibility_menu_link_add_handicap($tree);
       $menu_display = menu_tree_output($tree);
 
       $menu_html .= drupal_render($menu_display);
@@ -127,10 +127,12 @@ function os2web_accessibility_site_map_menus() {
 
   return $menu_html;
 }
-function os2web_accessibility_menu_link_alter($tree){
+function os2web_accessibility_menu_link_add_handicap($tree){
   foreach ($tree as $i =>$link) {
     //print_r($link);
     foreach ($link as $key => $value) {
+      if(is_object($value))
+        continue;
       $pos = substr($value['href'],0,4);
       if($pos === 'node') {
         $link_value = str_replace('node/','handicap/',$value['href']);
