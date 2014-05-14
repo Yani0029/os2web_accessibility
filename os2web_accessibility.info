@@ -3,4 +3,6 @@ description = Handicap module, display site in a print version
 core = 7.x
 version = 7.x-1.0
 project = os2web_accessibility
-features[features_api][] = api:1
+dependencies[] = menu
+dependencies[] = print
+
