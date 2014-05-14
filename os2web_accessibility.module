@@ -85,7 +85,7 @@ function os2web_accessibility_frontpage($nid = '') {
     // delete print window open and close.
     $html = str_replace("window.print();","",$html);
     $html = str_replace("window.close();","",$html);
-    $html = str_replace('<div class="print-foot" style = "width:100%">',"$output <div class='print-foot' style = 'width:100%'>",$html);
+    $html = str_replace('<div class="print-footer">',"$output <div class='print-footer'>",$html);
     print $html;
   }
 
@@ -98,8 +98,6 @@ function os2web_accessibility_frontpage($nid = '') {
  *   Returns HTML string of site map for menus.
  */
 function os2web_accessibility_site_map_menus() {
-  $output = '';
-  $options = array();
   $mids = array_filter(variable_get('os2web_accessibility_show_menus', array()));
 
   if (!empty($mids)) {
@@ -110,14 +108,12 @@ function os2web_accessibility_site_map_menus() {
       $tree = menu_tree_all_data($mid);
 
       if (module_exists('i18n_menu')) {
-        $tree = i18n_menu_localize_tree($tree, $GLOBALS['language']->language);
+        //$tree = i18n_menu_localize_tree($tree, $GLOBALS['language']->language);
       }
 
       // Add an alter hook so other modules can manipulate the menu tree prior to rendering
-      $alter_mid = preg_replace('/[^a-z0-9_]+/', '_', $mid);
-      drupal_alter(array('site_map_menu_tree', 'site_map_menu_tree_' . $alter_mid), $tree, $menu);
-      $tree = os2web_accessibility_menu_link_add_handicap($tree);
-      $menu_display = menu_tree_output($tree);
+      $tree_1 = os2web_accessibility_menu_link_add_handicap($tree);
+      $menu_display = menu_tree_output($tree_1);
 
       $menu_html .= drupal_render($menu_display);
       //print_r($menu_html);
@@ -127,29 +123,33 @@ function os2web_accessibility_site_map_menus() {
 
   return $menu_html;
 }
-function os2web_accessibility_menu_link_add_handicap($tree){
+function os2web_accessibility_menu_link_add_handicap($tree = array()){
   foreach ($tree as $i =>$link) {
-    //print_r($link);
     foreach ($link as $key => $value) {
-      if(is_object($value))
-        continue;
-      $pos = substr($value['href'],0,4);
-      if($pos === 'node') {
-        $link_value = str_replace('node/','handicap/',$value['href']);
+      foreach ($value as $name => $v) {
+        if ($name == 'href') {
+          $pos = substr($v,0,4);
+          if($pos === 'node') {
+            $link_value = str_replace('node/','handicap/',$v);
+          }
+          else {
+            $link_value = "handicap/".$v;
+          }
+          $tree[$i][$key][$name] = $link_value;
+        }
       }
-      else {
-        $link_value = "handicap/".$value['href'];
+      if($key == 'below' && !empty($key)) {
+         $tree[$i][$key] = os2web_accessibility_menu_link_add_handicap($value);
       }
-      $tree[$i][$key]['href'] = $link_value;
     }
   }
   return $tree;
 }
 
 function os2web_accessibility_js_alter(&$javascript) {
-  $path = current_path();
-  $path = explode("/",$path);
-  if ($path[0] == 'handicap') {
+  //$path = current_path();
+  //$path = explode("/",$path);
+ // if ($path[0] == 'handicap') {
     //unset($javascript['path/to/script.js']);
-  }
+  //}
 }
