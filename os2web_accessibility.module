@@ -66,26 +66,23 @@ function os2web_accessibility_frontpage($nid = '') {
 
   // Goto handicap node page.
   if ($nid != "") {
-    //if (is_numeric($nid)) {
       $print_node_id = $nid;
-      $print = print_controller($print_node_id, $query, $cid, PRINT_HTML_FORMAT);
-
-    /*}
-    else {
-      // Get taxonomy pages content.
-      $print = "";
-    }*/
   }
   // Goto handicap frontpage - node + menus.
   else {
     $print_node_id = $nid_setting;
-    $print = print_controller($print_node_id, $query, $cid, PRINT_HTML_FORMAT);
   }
+
+  $print = print_controller($print_node_id, $query, $cid, PRINT_HTML_FORMAT);
 
   if ($print !== FALSE) {
     $node = $print['node'];
-    $output = os2web_accessibility_site_map_menus();
-
+    if ($print_node_id == $nid_setting) {
+      $output = os2web_accessibility_site_map_menus();
+    }
+    else {
+      $output = "";
+    }
     $html = theme(
       'os2web_accessibility',
        array('handicap' => $print, 'type' => PRINT_HTML_FORMAT, 'node' => $node, 'menu'=>$output,'right_blocks' => $right_blocks)
@@ -139,11 +136,9 @@ function os2web_accessibility_site_map_menus() {
       $tree = menu_tree_all_data($mid);
       menu_tree_trim_active_path($tree);
       menu_tree_prune_active_tree($tree,1);
-
       if (module_exists('i18n_menu')) {
         //$tree = i18n_menu_localize_tree($tree, $GLOBALS['language']->language);
       }
-
       // Add an alter hook so other modules can manipulate the menu tree prior to rendering
       $tree_1 = os2web_accessibility_menu_link_add_handicap($tree);
       $menu_display = menu_tree_output($tree_1);
@@ -164,6 +159,10 @@ function os2web_accessibility_menu_link_add_handicap($tree = array()){
           $pos = substr($v,0,4);
           if($pos === 'node') {
             $link_value = str_replace('node/','handicap/',$v);
+          }
+          elseif ($pos === 'taxo') {
+            $alias = drupal_get_path_alias($v);
+            $link_value = "handicap/".$alias;
           }
           else {
             $link_value = "handicap/".$v;
