@@ -58,37 +58,68 @@ function os2web_accessibility_setting_form() {
 function os2web_accessibility_frontpage($nid = '') {
   $nid_setting = variable_get('os2web_accessibility_node_content',18);
   global $base_url;
-
-  // Goto handicap node page.
-  if ($nid != "") {
-    $print_node_id = $nid;
-  }
-  // Goto handicap frontpage - node + menus.
-  else {
-    $print_node_id = $nid_setting;
-  }
   // Handle the query
   $query = $_GET;
   unset($query['q']);
 
   module_load_include('inc', 'print', 'print.pages');
 
-  $print = print_controller($print_node_id, $query, $cid, PRINT_HTML_FORMAT);
+  // Goto handicap node page.
+  if ($nid != "") {
+    //if (is_numeric($nid)) {
+      $print_node_id = $nid;
+      $print = print_controller($print_node_id, $query, $cid, PRINT_HTML_FORMAT);
+
+    /*}
+    else {
+      // Get taxonomy pages content.
+      $print = "";
+    }*/
+  }
+  // Goto handicap frontpage - node + menus.
+  else {
+    $print_node_id = $nid_setting;
+    $print = print_controller($print_node_id, $query, $cid, PRINT_HTML_FORMAT);
+  }
 
   if ($print !== FALSE) {
     $node = $print['node'];
     $output = os2web_accessibility_site_map_menus();
 
-    $html = theme('print', array('print' => $print, 'type' => PRINT_HTML_FORMAT, 'node' => $node));
+    $html = theme(
+      'os2web_accessibility',
+       array('handicap' => $print, 'type' => PRINT_HTML_FORMAT, 'node' => $node, 'menu'=>$output,'right_blocks' => $right_blocks)
+    );
     drupal_add_http_header('Content-Type', 'text/html; charset=utf-8');
     drupal_send_headers();
     // delete print window open and close.
     $html = str_replace("window.print();","",$html);
     $html = str_replace("window.close();","",$html);
-    $html = str_replace('<div class="print-footer">',"$output <div class='print-footer'>",$html);
+    //$html = str_replace('<div class="print-foot" style = "width:100%">',"$output <div class='print-foot'>",$html);
     print $html;
   }
 
+}
+
+/**
+ * Implements hook_theme().
+ */
+function os2web_accessibility_theme() {
+  return array(
+    'print_format_link' => array(
+      'variables' => array(),
+    ),
+    'os2web_accessibility' => array(
+      'variables' => array(
+        'handicap' => array(),
+        'type' => PRINT_HTML_FORMAT,
+        'node' => NULL,
+        'menu' => NULL,
+        'right_blocks' => NULL
+      ),
+      'template' => 'os2web_accessibility',
+    ),
+  );
 }
 
 /**
@@ -106,6 +137,8 @@ function os2web_accessibility_site_map_menus() {
       $menu = menu_load($mid);
       // Use menu_tree_all_data to retrieve the expanded tree.
       $tree = menu_tree_all_data($mid);
+      menu_tree_trim_active_path($tree);
+      menu_tree_prune_active_tree($tree,1);
 
       if (module_exists('i18n_menu')) {
         //$tree = i18n_menu_localize_tree($tree, $GLOBALS['language']->language);
