@@ -78,10 +78,10 @@ function os2web_accessibility_frontpage($nid = '') {
   if ($print !== FALSE) {
     $node = $print['node'];
     if ($print_node_id == $nid_setting) {
-      $output = os2web_accessibility_site_map_menus();
+      $output = os2web_accessibility_site_map_menus($page = FALSE);
     }
     else {
-      $output = "";
+      $output = os2web_accessibility_site_map_menus($page = TRUE);
     }
     $html = theme(
       'os2web_accessibility',
@@ -125,30 +125,40 @@ function os2web_accessibility_theme() {
  * @return string
  *   Returns HTML string of site map for menus.
  */
-function os2web_accessibility_site_map_menus() {
-  $mids = array_filter(variable_get('os2web_accessibility_show_menus', array()));
+function os2web_accessibility_site_map_menus($true = FALSE) {
+  if (!$true) {
+    $mids = array_filter(variable_get('os2web_accessibility_show_menus', array()));
 
-  if (!empty($mids)) {
-    foreach ($mids as $mid) {
-      $class = array();
-      $menu = menu_load($mid);
-      // Use menu_tree_all_data to retrieve the expanded tree.
-      $tree = menu_tree_all_data($mid);
-      menu_tree_trim_active_path($tree);
-      menu_tree_prune_active_tree($tree,1);
-      if (module_exists('i18n_menu')) {
+    if (!empty($mids)) {
+      foreach ($mids as $mid) {
+        $class = array();
+        print $mid;
+        $menu = menu_load($mid);
+        // Use menu_tree_all_data to retrieve the expanded tree.
+        $tree = menu_tree_all_data($mid);
+        menu_tree_trim_active_path($tree);
+        //menu_tree_prune_active_tree($tree,1);
+        if (module_exists('i18n_menu')) {
         //$tree = i18n_menu_localize_tree($tree, $GLOBALS['language']->language);
-      }
-      // Add an alter hook so other modules can manipulate the menu tree prior to rendering
-      $tree_1 = os2web_accessibility_menu_link_add_handicap($tree);
-      $menu_display = menu_tree_output($tree_1);
+        }
+        // Add an alter hook so other modules can manipulate the menu tree prior to rendering
+        $tree_1 = os2web_accessibility_menu_link_add_handicap($tree);
+        $menu_display = menu_tree_output($tree_1);
 
-      $menu_html .= drupal_render($menu_display);
-      //print_r($menu_html);
-      if (!empty($menu_html)) {}
+        $menu_html .= drupal_render($menu_display);
+      }
     }
   }
+  else {
+    $menu_tmp = menu_block_get_current_page_menu();
+    menu_tree_trim_active_path($tree);
+    $tree = menu_tree_all_data($menu_tmp);
+    menu_tree_prune_active_tree($tree,'child');
+    $tree_1 = os2web_accessibility_menu_link_add_handicap($tree);
+    $menu_display = menu_tree_output($tree_1);
 
+    $menu_html = drupal_render($menu_display);
+  }
   return $menu_html;
 }
 function os2web_accessibility_menu_link_add_handicap($tree = array()){

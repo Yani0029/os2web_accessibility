@@ -23,12 +23,18 @@
     <?php if (!empty($handicap['message'])) {
       //print '<div class="print-message">'. $handicap['message'] .'</div><p />';
     } ?>
-    <div class="print-yani"><?php print $handicap['logo']; ?></div>
-    <div class="print-site_name"><?php //print $handicap['site_name']; ?></div>
+    <div class="print-logo"><?php print $handicap['logo']; ?></div>
+    <div class="print-site_name"><?php print $handicap['site_name']; ?></div>
     <p />
-    <div class="print-breadcrumb"><?php //print $handicap['breadcrumb']; ?></div>
-    <!--<hr class="print-hr" /> -->
+    <div class="print-breadcrumb"><?php print $handicap['breadcrumb']; ?></div>
+    <hr class="print-hr" />
     <div class="print-content" style='margin-bottom: 10px; max-height: 970px;'>
+      <?php $nid = variable_get('os2web_accessibility_node_content');
+            $arg = arg(1);
+            $arg_0 = arg(0);
+        if((isset($arg) && $nid != $arg) ||($arg_0 != "handicap" && !$arg)): ?>
+          <div><a href="/handicap" style="text-decoration: underline">Tilbage til Handicap forside</a></div>
+        <?php endif; ?>
       <div class="handicap-menu" style="float: left; width:200px; min-height: 200px;clear:both;">
         <?php print $menu; ?>
       </div>
