@@ -83,6 +83,49 @@ function os2web_accessibility_frontpage($nid = '') {
     else {
       $output = os2web_accessibility_site_map_menus($page = TRUE);
     }
+    // Change link href to handicap/
+    $array = explode("<a",$print['content']);
+    foreach($array as $key => $value) {
+      preg_match('/href=["\']?([^"\'>]+)["\']?/', $value, $matches);
+
+      $info = parse_url($matches[1]);
+      if ($info['host'] == $_SERVER['SERVER_NAME'] && ($info['path'] && $info['path'] != "/")) {
+        $info['path'] = substr($info['path'],1);
+        if($drupal_path = drupal_lookup_path("source", $info['path'])) {
+          $pos = substr($drupal_path,0,4);
+          if($pos === 'node') {
+            $link_value = str_replace('node/','handicap/',$drupal_path);
+          }
+          elseif ($pos === 'taxo') {
+            $link_value = "handicap/".$info['path'];
+          }
+          else {
+            $link_value = "handicap/".$drupal_path;
+          }
+        }
+        else {
+          $pos = substr($info['path'],0,4);
+          if($pos === 'node') {
+            $link_value = str_replace('node/','handicap/',$info['path']);
+          }
+          elseif ($pos === 'taxo') {
+            $alias = drupal_get_path_alias($info['path']);
+            $link_value = "handicap/".$alias;
+          }
+          else {
+            $link_value = "handicap/".$info['path'];
+          }
+        }
+
+        $pattern = $info['scheme']."://".$info['host'] . "/" .$info['path'];
+        $replace = $info['scheme']."://".$info['host']. "/".$link_value;
+        $value = str_replace($pattern,$replace,$value);
+        $array[$key] = $value;
+      }
+
+    }
+    $print['content'] =implode("<a",$array);
+
     $html = theme(
       'os2web_accessibility',
        array('handicap' => $print, 'type' => PRINT_HTML_FORMAT, 'node' => $node, 'menu'=>$output,'right_blocks' => $right_blocks)
