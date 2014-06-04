@@ -132,7 +132,6 @@ function os2web_accessibility_site_map_menus($true = FALSE) {
     if (!empty($mids)) {
       foreach ($mids as $mid) {
         $class = array();
-        print $mid;
         $menu = menu_load($mid);
         // Use menu_tree_all_data to retrieve the expanded tree.
         $tree = menu_tree_all_data($mid);
@@ -150,9 +149,10 @@ function os2web_accessibility_site_map_menus($true = FALSE) {
     }
   }
   else {
-    $menu_tmp = menu_block_get_current_page_menu();
+    $menu_tmp = "os2web-menu-contentmenu";
+   // $menu_tmp = menu_block_get_current_page_menu();
+    $tree = menu_tree_page_data($menu_tmp);
     menu_tree_trim_active_path($tree);
-    $tree = menu_tree_all_data($menu_tmp);
     menu_tree_prune_active_tree($tree,'child');
     $tree_1 = os2web_accessibility_menu_link_add_handicap($tree);
     $menu_display = menu_tree_output($tree_1);
