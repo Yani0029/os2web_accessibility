@@ -206,24 +206,36 @@ function os2web_accessibility_get_right_blocks(){
  */
 function os2web_accessibility_site_map_menus($true = FALSE) {
   if (!$true) {
+    $menu_tmp = "os2web-menu-contentmenu";
+   // $menu_tmp = menu_block_get_current_page_menu();
+    $tree = menu_tree_all_data($menu_tmp);
+     menu_tree_trim_active_path($tree);
+
+    $tree_1 = os2web_accessibility_menu_link_add_handicap($tree);
+    $menu_display = menu_tree_output($tree_1);
+
+    $menu_html = drupal_render($menu_display);
+
     $mids = array_filter(variable_get('os2web_accessibility_show_menus', array()));
 
     if (!empty($mids)) {
       foreach ($mids as $mid) {
-        $class = array();
-        $menu = menu_load($mid);
-        // Use menu_tree_all_data to retrieve the expanded tree.
-        $tree = menu_tree_all_data($mid);
-        menu_tree_trim_active_path($tree);
-        //menu_tree_prune_active_tree($tree,1);
-        if (module_exists('i18n_menu')) {
-        //$tree = i18n_menu_localize_tree($tree, $GLOBALS['language']->language);
-        }
-        // Add an alter hook so other modules can manipulate the menu tree prior to rendering
-        $tree_1 = os2web_accessibility_menu_link_add_handicap($tree);
-        $menu_display = menu_tree_output($tree_1);
+        if ($mid != "os2web-menu-contentmenu") {
+          $class = array();
+          $menu = menu_load($mid);
+          // Use menu_tree_all_data to retrieve the expanded tree.
+          $tree = menu_tree_all_data($mid);
+          // menu_tree_trim_active_path($tree);
+          //menu_tree_prune_active_tree($tree,1);
+          // if (module_exists('i18n_menu')) {
+           //$tree = i18n_menu_localize_tree($tree, $GLOBALS['language']->language);
+          // }
+          // Add an alter hook so other modules can manipulate the menu tree prior to rendering
+          $tree_1 = os2web_accessibility_menu_link_add_handicap($tree);
+          $menu_display = menu_tree_output($tree_1);
 
-        $menu_html .= drupal_render($menu_display);
+          $menu_html .= drupal_render($menu_display);
+        }
       }
     }
   }
@@ -247,14 +259,26 @@ function os2web_accessibility_menu_link_add_handicap($tree = array()){
         if ($name == 'href') {
           $pos = substr($v,0,4);
           if($pos === 'node') {
-            $link_value = str_replace('node/','handicap/',$v);
+            if($v == 'node/add') {
+              $link_value = $v;
+            }
+            else
+              $link_value = str_replace('node/','handicap/',$v);
           }
           elseif ($pos === 'taxo') {
             $alias = drupal_get_path_alias($v);
             $link_value = "handicap/".$alias;
           }
           else {
-            $link_value = "handicap/".$v;
+            if($v != "<nolink>") {
+              if($pos != "http")
+                $link_value = "handicap/".$v;
+              else $link_value = $v;
+            }
+            else {
+              $link_value = "handicap";
+
+            }
           }
           $tree[$i][$key][$name] = $link_value;
         }
