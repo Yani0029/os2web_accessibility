@@ -45,7 +45,7 @@
         <div class="handicap-content" style="float:left; width: 600px; padding: 20px 20px;">
           <?php print $handicap['content']; ?></div>
         <div class="handicap-right" style="float: right; width: 300px; min-height: 300px;">
-          <?php print $right_blocks; ?></div>
+          <?php if($right_blocks)  print $right_blocks; ?></div>
       </div>
 
     <hr class="print-hr">
