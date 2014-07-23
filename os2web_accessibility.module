@@ -125,8 +125,8 @@ function os2web_accessibility_frontpage($nid = '') {
 
     }
     $print['content'] =implode("<a",$array);
-    $print['site_name'] = '<a href="'.$base_url .'">' .variable_get('site_name', 'Drupal') .'</a>';
-    $print['logo'] = '<img src="' . theme_get_setting('logo') . '" width="64" height="73" alt="logo" />';
+    //$print['site_name'] = '<a href="'.$base_url .'">' .variable_get('site_name', 'Drupal') .'</a>';
+    $print['logo'] = '<a href="'.$base_url .'"><img src="' . theme_get_setting('logo') . '" alt="logo" title="' .variable_get('site_name', 'Drupal').'"/></a>';
 
     $right_blocks = os2web_accessibility_get_right_blocks();
 
@@ -136,6 +136,7 @@ function os2web_accessibility_frontpage($nid = '') {
     );
     drupal_add_http_header('Content-Type', 'text/html; charset=utf-8');
     drupal_send_headers();
+    drupal_add_css(drupal_get_path('module','os2web_accessibility').'os2web_accessibility.css');
     // delete print window open and close.
     $html = str_replace("window.print();","",$html);
     $html = str_replace("window.close();","",$html);
