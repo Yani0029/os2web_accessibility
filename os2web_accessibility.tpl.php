@@ -23,11 +23,11 @@
     <?php if (!empty($handicap['message'])) {
       //print '<div class="print-message">'. $handicap['message'] .'</div><p />';
     } ?>
-    <div class="print-logo"><?php print $handicap['logo']; ?></div>
-    <div class="print-site_name"><?php print $handicap['site_name']; ?></div>
+
+    <div class="print-site_name" style="margin: 20px 20px; font-size: 24px;"><div class="print-logo" style="display: inline-block; margin-right: 10px;"><?php print $handicap['logo']; ?></div><?php print $handicap['site_name']; ?><hr></div>
     <p />
-    <div class="print-breadcrumb"><?php print $handicap['breadcrumb']; ?></div>
-    <hr class="print-hr" />
+    <div class="print-breadcrumb" style="margin: 0 20px 0 40px;"><?php print $handicap['breadcrumb']; ?><hr class="print-hr" /></div>
+
     <div class="print-content" style='margin-bottom: 10px; max-height: 970px;'>
       <?php $nid = variable_get('os2web_accessibility_node_content');
             $arg = arg(1);
@@ -40,7 +40,9 @@
       </div>
       <div class="handicap-content" style="float:left; width: 600px;">
         <?php print $handicap['content']; ?></div>
-      <div class="handicap-right" style="float: right; width: 300px; min-height: 300px;"></div>
+      <div class="handicap-right" style="float: right; width: 300px; min-height: 300px;">
+        <?php print $right_blocks; ?></div>
+      </div>
     </div>
     <div class="print-foot" style = "width:100%; clear:both">
       <hr class="" />

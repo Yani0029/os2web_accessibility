@@ -125,6 +125,10 @@ function os2web_accessibility_frontpage($nid = '') {
 
     }
     $print['content'] =implode("<a",$array);
+    $print['site_name'] = '<a href="'.$base_url .'">' .variable_get('site_name', 'Drupal') .'</a>';
+    $print['logo'] = '<img src="' . theme_get_setting('logo') . '" width="64" height="73" alt="logo" />';
+
+    $right_blocks = os2web_accessibility_get_right_blocks();
 
     $html = theme(
       'os2web_accessibility',
@@ -160,6 +164,37 @@ function os2web_accessibility_theme() {
       'template' => 'os2web_accessibility',
     ),
   );
+}
+function os2web_accessibility_get_right_blocks(){
+  $result = 0;
+  $arg_0 = arg(0);
+  $arg_1 = arg(1);
+  $arg_2 = arg(2);
+  if((isset($arg_1) && $arg_1 == 'add') || (isset($arg_2) && $arg_2 == 'edit') ) {
+      return "";
+  }
+  if ($arg_0 === 'taxonomy' && $arg_1 === 'term') {
+      $ent = taxonomy_term_load($path[2]);
+      $field = field_get_items('taxonomy_term', $ent, 'field_os2web_base_field_contact');
+  }
+  elseif ($path[0] === 'node') {
+    if (isset($path[1]) && is_numeric($path[1])) {
+      $ent = node_load($path[1]);
+      $field = field_get_items('node', $ent, 'field_os2web_base_field_contact');
+    }
+  }
+  else {
+    $node = menu_get_object();
+    if($node) {
+      $field = field_get_items('node', $node,'field_os2web_base_field_contact');
+    }
+  }
+  if (isset($field[0]['nid'])) {
+    $nid = $field[0]['nid'];
+    $view = views_get_view("os2web_contact_view_contact");
+    $result = $view->preview('panel_pane_2', array($nid));
+  }
+  return $result;
 }
 
 /**
