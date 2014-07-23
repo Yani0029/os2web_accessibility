@@ -89,7 +89,7 @@ function os2web_accessibility_frontpage($nid = '') {
       preg_match('/href=["\']?([^"\'>]+)["\']?/', $value, $matches);
 
       $info = parse_url($matches[1]);
-      if ($info['host'] == $_SERVER['SERVER_NAME'] && ($info['path'] && $info['path'] != "/")) {
+      if (isset($info['host']) && $info['host'] == $_SERVER['SERVER_NAME'] && ($info['path'] && $info['path'] != "/")) {
         $info['path'] = substr($info['path'],1);
         if($drupal_path = drupal_lookup_path("source", $info['path'])) {
           $pos = substr($drupal_path,0,4);
@@ -175,12 +175,12 @@ function os2web_accessibility_get_right_blocks(){
       return "";
   }
   if ($arg_0 === 'taxonomy' && $arg_1 === 'term') {
-      $ent = taxonomy_term_load($path[2]);
+      $ent = taxonomy_term_load($arg_1);
       $field = field_get_items('taxonomy_term', $ent, 'field_os2web_base_field_contact');
   }
-  elseif ($path[0] === 'node') {
-    if (isset($path[1]) && is_numeric($path[1])) {
-      $ent = node_load($path[1]);
+  elseif ($arg_0 === 'node') {
+    if (isset($arg_1) && is_numeric($arg_1)) {
+      $ent = node_load($arg_1);
       $field = field_get_items('node', $ent, 'field_os2web_base_field_contact');
     }
   }
