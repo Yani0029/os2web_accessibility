@@ -125,6 +125,16 @@ function os2web_accessibility_frontpage($nid = '') {
 
     }
     $print['content'] =implode("<a",$array);
+
+    // Change form action to handicap/
+    $array = explode("<form",$print['content']);
+    foreach($array as $key => $value) {
+      preg_match('/action=["\']?([^"\'>]+)["\']?/', $value, $matches);
+      $value = str_replace($matches[1],"/handicap".$matches[1],$value);
+      $array[$key] = $value;
+    }
+    $print['content'] =implode("<form",$array);
+
     //$print['site_name'] = '<a href="'.$base_url .'">' .variable_get('site_name', 'Drupal') .'</a>';
     $print['logo'] = '<a href="'.$base_url .'"><img src="' . theme_get_setting('logo') . '" alt="logo" title="' .variable_get('site_name', 'Drupal').'"/></a>';
 
